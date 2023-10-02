@@ -9,12 +9,11 @@ foreach ($p in $profilelist) {
         $objUser = "[UNKNOWN]"
     }
 
-    Remove-Variable -Force LTH,LTL,UTH,UTL -ErrorAction SilentlyContinue
+    Remove-Variable -Force LTH,LTL -ErrorAction SilentlyContinue
 
     $LTH = '{0:X8}' -f (Get-ItemProperty -Path $p.PSPath -Name LocalProfileLoadTimeHigh -ErrorAction SilentlyContinue).LocalProfileLoadTimeHigh
     $LTL = '{0:X8}' -f (Get-ItemProperty -Path $p.PSPath -Name LocalProfileLoadTimeLow -ErrorAction SilentlyContinue).LocalProfileLoadTimeLow
-    $UTH = '{0:X8}' -f (Get-ItemProperty -Path $p.PSPath -Name LocalProfileUnloadTimeHigh -ErrorAction SilentlyContinue).LocalProfileUnloadTimeHigh
-    $UTL = '{0:X8}' -f (Get-ItemProperty -Path $p.PSPath -Name LocalProfileUnloadTimeLow -ErrorAction SilentlyContinue).LocalProfileUnloadTimeLow
+   
 
     $LoadTime = if ($LTH -and $LTL)
     {
@@ -24,29 +23,12 @@ foreach ($p in $profilelist) {
         $null
     }
 
-    $UnloadTime = if ($UTH -and $UTL)
-    {
-        [datetime]::FromFileTime("0x$UTH$UTL")
-    }
-    else
-    {
-        $null
-    }
-
-    if($LoadTime -lt $((Get-Date).AddDays(-30)))
+    if($LoadTime -lt $((Get-Date).AddDays(-45)))
     {
         $Sids += $p.PSChildName
-   
-        [pscustomobject][ordered]@{
-            User = $objUser
-            SID = $p.PSChildName
-            Loadtime = $LoadTime
-            UnloadTime = $UnloadTime
-        }#>
     }
 
-    $p.Dispose()
-
+    $p.Dispose
 } 
 
 $Sids | select -skip 3 | %{
