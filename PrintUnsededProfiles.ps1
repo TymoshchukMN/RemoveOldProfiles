@@ -1,4 +1,7 @@
-﻿$profilelist = Get-ChildItem "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList"
+﻿# code was gotten from https://woshub.com/delete-old-user-profiles-gpo-powershell/
+
+
+$profilelist = Get-ChildItem "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList"
 
 foreach ($p in $profilelist) {
     try
@@ -35,14 +38,13 @@ foreach ($p in $profilelist) {
     if($LoadTime -lt $((Get-Date).AddDays(-30)))
     {
         $sid = $p.PSChildName
-        #Get-WmiObject -Class Win32_UserProfile | Where-Object {$_.SID -eq $sid} | Remove-WmiObject
-        
+                
         [pscustomobject][ordered]@{
             User = $objUser
             SID = $p.PSChildName
             Loadtime = $LoadTime
             UnloadTime = $UnloadTime
-        }#>
+        }
     }
 
     $p.Dispose()
