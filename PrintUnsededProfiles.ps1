@@ -1,6 +1,5 @@
 ﻿$profilelist = Get-ChildItem "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList"
 
-[array]$Sids = @()
 foreach ($p in $profilelist) {
     try
     {
@@ -16,7 +15,6 @@ foreach ($p in $profilelist) {
     $LTL = '{0:X8}' -f (Get-ItemProperty -Path $p.PSPath -Name LocalProfileLoadTimeLow -ErrorAction SilentlyContinue).LocalProfileLoadTimeLow
     $UTH = '{0:X8}' -f (Get-ItemProperty -Path $p.PSPath -Name LocalProfileUnloadTimeHigh -ErrorAction SilentlyContinue).LocalProfileUnloadTimeHigh
     $UTL = '{0:X8}' -f (Get-ItemProperty -Path $p.PSPath -Name LocalProfileUnloadTimeLow -ErrorAction SilentlyContinue).LocalProfileUnloadTimeLow
-
     $LoadTime = if ($LTH -and $LTL)
     {
         [datetime]::FromFileTime("0x$LTH$LTL")
@@ -35,14 +33,17 @@ foreach ($p in $profilelist) {
     }
 
     if($LoadTime -lt $((Get-Date).AddDays(-30)))
-    {   
+    {
+        $sid = $p.PSChildName
+        #Get-WmiObject -Class Win32_UserProfile | Where-Object {$_.SID -eq $sid} | Remove-WmiObject
+        
         [pscustomobject][ordered]@{
             User = $objUser
             SID = $p.PSChildName
             Loadtime = $LoadTime
             UnloadTime = $UnloadTime
-        }
+        }#>
     }
 
-    $p.Dispose
+    $p.Dispose()
 } 
