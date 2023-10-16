@@ -28,7 +28,7 @@ foreach ($p in $profilelist) {
         $Sids += $p.PSChildName
     }
 
-    $p.Dispose
+    $p.Dispose()
 } 
 
 $Sids | select -skip 3 | %{
